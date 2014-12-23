@@ -75,6 +75,7 @@ function pointer(el) {
   }
 
   function onpointerlockchange(ev) {
+    biggestMovementX = biggestMovementY = 0;
     if(!pointerlockelement()) {
       if(stream) release()
       return
@@ -150,27 +151,29 @@ function pointer(el) {
 
     virtualBuggyX += dx;
     virtualBuggyY += dy;
-    var changed = false;
+    var mightHaveFoundBuggyOrigin = false;
     if((dx > 0 && dx > biggestMovementX) || 
       (dx < 0 && dx < -biggestMovementX)
     ) {
       biggestMovementX = Math.abs(dx);
-      changed = true;
+      mightHaveFoundBuggyOrigin = true;
     }
 
     if((dy > 0 && dy > biggestMovementY) || 
       (dy < 0 && dy < -biggestMovementY)
     ) {
       biggestMovementY = Math.abs(dy);
-      changed = true;
+      mightHaveFoundBuggyOrigin = true;
     }
 
-    if(changed) {
-      setBuggyOrigin(virtualBuggyX, virtualBuggyY);
+    if(mightHaveFoundBuggyOrigin) {
+      buggyX = virtualBuggyX;
+      buggyY = virtualBuggyY;
     }
+    
     if(Math.abs(virtualBuggyX - buggyX) < skipPixelTolerance && Math.abs(virtualBuggyY - buggyY) < skipPixelTolerance) {
-        out.dx = 0;
-        out.dy = 0;
+      out.dx = 0;
+      out.dy = 0;
     }
     eventEmitter.emit('data', out)
     stream.emit('data', out)
@@ -188,8 +191,6 @@ function pointer(el) {
 
   function setBuggyOrigin(x, y) {
     // console.log('buggy', x, y);
-    buggyX = x;
-    buggyY = y;
   }
 
 }

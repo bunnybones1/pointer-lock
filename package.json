@@ -1,7 +1,7 @@
 {
-  "name": "pointer-lock",
+  "name": "pointer-lock-chrome-tolerant",
   "version": "0.0.5",
-  "description": "pointer lock polyfill that presents an eventemitter / stream api",
+  "description": "pointer lock polyfill that presents an eventemitter / stream api. This is a fork with an awful hack to get around a chrome on windows pointerlock mouse movement bug.",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/chrisdickinson/pointer-lock.git"
+    "url": "git://github.com/bunnybones1/pointer-lock-chrome-tolerant.git"
   },
   "keywords": [
     "pointer-lock",
@@ -19,7 +19,10 @@
     "lock",
     "browserify"
   ],
-  "author": "Chris Dickinson <chris@neversaw.us>",
+  "authors": [
+    "Chris Dickinson <chris@neversaw.us>",
+    "Tomasz Dysinski <oz@bunnybones.com>"
+  ],
   "license": "MIT",
   "devDependencies": {
     "dom-quick-text": "^1.0.2",

@@ -1,13 +1,13 @@
-# pointer-lock
+# pointer-lock-chrome-tolerant
 
-pointer-lock api exposed as an event emitter that emits readable streams
+pointer-lock-chrome-tolerant api exposed as an event emitter that emits readable streams
 of mouse movement data. automatically handles adding appropriate mousedown/up
 event listeners on the targeted element. tries to reuse objects instead of creating
 new objects, to keep garbage generation low. may sing you songs, if you're nice
 enough to it.
 
 ```javascript
-var lock = require('pointer-lock')
+var lock = require('pointer-lock-chrome-tolerant')
   , my_element = document.getElementById('element')
 
 if(!lock.available())
@@ -31,7 +31,7 @@ pointer.on('attain', function(movements) {
   })
 
   movements.on('close', function() {
-    // no more movements from this pointer-lock session.
+    // no more movements from this pointer-lock-chrome-tolerant session.
   })
 })
 
