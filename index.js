@@ -2,7 +2,7 @@ module.exports = pointer
 
 pointer.available = available
 
-var EE = require('events').EventEmitter
+var EventEmitter = require('events').EventEmitter
   , Stream = require('stream').Stream
 
 function available() {
@@ -10,51 +10,52 @@ function available() {
 }
 
 function pointer(el) {
-  var ael = el.addEventListener || el.attachEvent
-    , rel = el.removeEventListener || el.detachEvent
+  var addEventListener = el.addEventListener || el.attachEvent
+    , removeEventListener = el.removeEventListener || el.detachEvent
     , doc = el.ownerDocument
     , body = doc.body
-    , rpl = shim(el) 
+    , requestPointerLock = shim(el) 
     , out = {dx: 0, dy: 0, dt: 0}
-    , ee = new EE
+    , eventEmitter = new EventEmitter
     , stream = null
-    , lastPageX, lastPageY
+    , lastPageX = 0
+    , lastPageY = 0
     , needsFullscreen = false
     , mouseDownMS
 
-  ael.call(el, 'mousedown', onmousedown, false)
-  ael.call(el, 'mouseup', onmouseup, false)
-  ael.call(body, 'mousemove', onmove, false)
+  addEventListener.call(el, 'mousedown', onmousedown, false)
+  addEventListener.call(el, 'mouseup', onmouseup, false)
+  addEventListener.call(body, 'mousemove', onmove, false)
 
   var vendors = ['', 'webkit', 'moz', 'ms', 'o']
 
   for(var i = 0, len = vendors.length; i < len; ++i) {
-    ael.call(doc, vendors[i]+'pointerlockchange', onpointerlockchange)
-    ael.call(doc, vendors[i]+'pointerlockerror', onpointerlockerror)
+    addEventListener.call(doc, vendors[i]+'pointerlockchange', onpointerlockchange)
+    addEventListener.call(doc, vendors[i]+'pointerlockerror', onpointerlockerror)
   }
 
-  ee.release = release
-  ee.target = pointerlockelement
-  ee.request = onmousedown
-  ee.destroy = function() {
-    rel.call(el, 'mouseup', onmouseup, false)
-    rel.call(el, 'mousedown', onmousedown, false)
-    rel.call(el, 'mousemove', onmove, false)
+  eventEmitter.release = release
+  eventEmitter.target = pointerlockelement
+  eventEmitter.request = onmousedown
+  eventEmitter.destroy = function() {
+    removeEventListener.call(el, 'mouseup', onmouseup, false)
+    removeEventListener.call(el, 'mousedown', onmousedown, false)
+    removeEventListener.call(el, 'mousemove', onmove, false)
   }
 
   if(!shim) {
     setTimeout(function() {
-      ee.emit('error', new Error('pointer lock is not supported'))
+      eventEmitter.emit('error', new Error('pointer lock is not supported'))
     }, 0)
   }
-  return ee
+  return eventEmitter
 
   function onmousedown(ev) {
     if(pointerlockelement()) {
       return
     }
     mouseDownMS = +new Date
-    rpl.call(el)
+    requestPointerLock.call(el)
   }
 
   function onmouseup(ev) {
@@ -62,7 +63,7 @@ function pointer(el) {
       return
     }
 
-    ee.emit('needs-fullscreen')
+    eventEmitter.emit('needs-fullscreen')
     needsFullscreen = false
   }
 
@@ -76,7 +77,7 @@ function pointer(el) {
     stream.readable = true
     stream.initial = {x: lastPageX, y: lastPageY, t: Date.now()}
 
-    ee.emit('attain', stream)
+    eventEmitter.emit('attain', stream)
   }
 
   function onpointerlockerror(ev) {
@@ -87,7 +88,7 @@ function pointer(el) {
       return
     }
 
-    ee.emit('error')
+    eventEmitter.emit('error')
     if(stream) {
       stream.emit('error', ev)
     }
@@ -95,7 +96,7 @@ function pointer(el) {
   }
 
   function release() {
-    ee.emit('release')
+    eventEmitter.emit('release')
 
     if(stream) {
       stream.emit('end')
@@ -119,7 +120,6 @@ function pointer(el) {
   function onmove(ev) {
     lastPageX = ev.pageX
     lastPageY = ev.pageY
-
     if(!stream) return
 
     // we're reusing a single object
@@ -138,7 +138,7 @@ function pointer(el) {
 
     out.dt = Date.now() - stream.initial.t
 
-    ee.emit('data', out)
+    eventEmitter.emit('data', out)
     stream.emit('data', out)
   }
 

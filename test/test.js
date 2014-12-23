@@ -1,21 +1,26 @@
 var lock = require('../index')
-  , rfs = require('fullscreen')
+  , domQuickText = require('dom-quick-text')
+  , requestFullscreen = require('fullscreen')
   , pointer
-  , fs
+  , fullscreen
 
-var div = document.createElement('div')
+var label = new domQuickText('pointer lock test. Press any key to lock');
 
-document.body.appendChild(div)
 
-div.style.display = 'none'
-div.style.position = 'absolute'
-div.style.width =
-div.style.height = '100px'
-div.style.top = 
-div.style.left = '0px'
-div.style.backgroundColor = 'red'
+var cursorDiv = document.createElement('div')
 
-fs = rfs(document.body) 
+document.body.appendChild(cursorDiv)
+
+cursorDiv.style.display = 'none'
+cursorDiv.style.position = 'absolute'
+cursorDiv.style.width =
+cursorDiv.style.height = '20px'
+cursorDiv.style.top = 
+cursorDiv.style.left = '0px'
+cursorDiv.style.backgroundColor = 'red'
+
+
+fullscreen = requestFullscreen(document.body) 
 pointer = lock(document.body)
 
 document.body.onkeydown = function(ev) {
@@ -25,26 +30,28 @@ document.body.onkeydown = function(ev) {
 
 pointer.on('error', console.log.bind(console))
 pointer.on('needs-fullscreen', function() {
-  fs.once('attain', function() {
+  fullscreen.once('attain', function() {
     pointer.request()
   })
-  fs.request()
+  fullscreen.request()
 })
 
 
 pointer.on('attain', function(stream) {
   var current = {x: stream.initial.x, y: stream.initial.y}
-  div.style.display = 'block'
+  cursorDiv.style.display = 'block'
+  label.update('attained pointer lock');
   stream
     .on('data', function(move) {
       current.x += move.dx
       current.y += move.dy
-      console.log(current.x, current.y)
-      div.style.left = current.x+'px'
-      div.style.top = current.y+'px'
+      label.update(current.x+'px '+ current.y+'px');
+      cursorDiv.style.left = current.x+'px'
+      cursorDiv.style.top = current.y+'px'
     })
 })
 
 pointer.on('release', function() {
-  div.style.display = 'none'
+  cursorDiv.style.display = 'none'
+  label.update('released pointer lock')
 })
