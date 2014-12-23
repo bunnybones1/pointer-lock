@@ -187,7 +187,7 @@ function pointer(el) {
   }
 
   function setBuggyOrigin(x, y) {
-    console.log('buggy', x, y);
+    // console.log('buggy', x, y);
     buggyX = x;
     buggyY = y;
   }
