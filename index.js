@@ -18,8 +18,15 @@ function pointer(el) {
     , out = {dx: 0, dy: 0, dt: 0}
     , eventEmitter = new EventEmitter
     , stream = null
+    , skipPixelTolerance = 4
     , lastPageX = 0
     , lastPageY = 0
+    , biggestMovementX = 0
+    , biggestMovementY = 0
+    , virtualBuggyX = 0
+    , virtualBuggyY = 0
+    , virtualInfiniteX = 0
+    , virtualInfiniteY = 0
     , needsFullscreen = false
     , mouseDownMS
 
@@ -122,22 +129,49 @@ function pointer(el) {
     lastPageY = ev.pageY
     if(!stream) return
 
+
     // we're reusing a single object
     // because I'd like to avoid piling up
     // a ton of objects for the garbage
     // collector.
-    out.dx =
+    var dx = 
       ev.movementX || ev.webkitMovementX ||
       ev.mozMovementX || ev.msMovementX ||
       ev.oMovementX || 0
 
-    out.dy = 
+    var dy = 
       ev.movementY || ev.webkitMovementY ||
       ev.mozMovementY || ev.msMovementY ||
       ev.oMovementY || 0
 
+    out.dx = dx;
+    out.dy = dy;
     out.dt = Date.now() - stream.initial.t
 
+    virtualBuggyX += dx;
+    virtualBuggyY += dy;
+    var changed = false;
+    if((dx > 0 && dx > biggestMovementX) || 
+      (dx < 0 && dx < -biggestMovementX)
+    ) {
+      biggestMovementX = Math.abs(dx);
+      changed = true;
+    }
+
+    if((dy > 0 && dy > biggestMovementY) || 
+      (dy < 0 && dy < -biggestMovementY)
+    ) {
+      biggestMovementY = Math.abs(dy);
+      changed = true;
+    }
+
+    if(changed) {
+      setBuggyOrigin(virtualBuggyX, virtualBuggyY);
+    }
+    if(Math.abs(virtualBuggyX - buggyX) < skipPixelTolerance && Math.abs(virtualBuggyY - buggyY) < skipPixelTolerance) {
+        out.dx = 0;
+        out.dy = 0;
+    }
     eventEmitter.emit('data', out)
     stream.emit('data', out)
   }
@@ -151,6 +185,13 @@ function pointer(el) {
       doc.oPointerLockElement ||
       null
   }
+
+  function setBuggyOrigin(x, y) {
+    console.log('buggy', x, y);
+    buggyX = x;
+    buggyY = y;
+  }
+
 }
 
 function shim(el) {
