@@ -25,6 +25,8 @@ function pointer(el) {
     , biggestMovementY = 0
     , virtualBuggyX = 0
     , virtualBuggyY = 0
+    , buggyX = 0
+    , buggyY = 0
     , virtualInfiniteX = 0
     , virtualInfiniteY = 0
     , needsFullscreen = false
