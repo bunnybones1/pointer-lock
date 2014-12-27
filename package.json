@@ -1,6 +1,6 @@
 {
   "name": "pointer-lock-chrome-tolerant",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "pointer lock polyfill that presents an eventemitter / stream api. This is a fork with an awful hack to get around a chrome on windows pointerlock mouse movement bug.",
   "main": "index.js",
   "directories": {
